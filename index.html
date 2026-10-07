@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>مسیریاب هوشمند مترو تهران — جست‌وجوی ایستگاه‌ها</title>
+<style>
+:root{
+  --bg:#07111f;--panel:#0d1a2b;--panel2:#10233a;--text:#eef6ff;--muted:#9fb3c8;
+  --brand:#43d2c2;--brand2:#6d8cff;--accent:#ffcc66;--danger:#ff6b7a;--ok:#62d897;
+  --line1:#e53935;--line3:#1976d2;--line6:#e91e63;--line7:#7e57c2;
+  --border:rgba(255,255,255,.10);--shadow:0 22px 70px rgba(0,0,0,.30);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(900px 520px at 85% -10%,rgba(67,210,194,.18),transparent 60%),
+ radial-gradient(780px 500px at -10% 8%,rgba(109,140,255,.18),transparent 58%),
+ linear-gradient(180deg,#07111f 0%,#091726 48%,#07111f 100%);
+ color:var(--text);font-family:Vazirmatn,Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer}
+.shell{width:min(1180px,calc(100% - 28px));margin:auto;padding:28px 0 60px}
+.hero{display:grid;grid-template-columns:1.45fr .7fr;gap:18px;align-items:stretch;margin-bottom:18px}
+.card{background:linear-gradient(180deg,rgba(16,35,58,.92),rgba(10,24,40,.92));border:1px solid var(--border);box-shadow:var(--shadow);border-radius:26px;backdrop-filter:blur(16px)}
+.hero-main{padding:28px;position:relative;overflow:hidden}.hero-main:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(67,210,194,.20),transparent 68%);left:-70px;bottom:-130px}
+.kicker{display:inline-flex;gap:8px;align-items:center;color:#bfe9e3;font-size:13px;background:rgba(67,210,194,.10);border:1px solid rgba(67,210,194,.18);padding:7px 11px;border-radius:999px}
+h1{font-size:clamp(26px,4vw,45px);line-height:1.2;margin:16px 0 10px;letter-spacing:-.7px}.hero p{color:var(--muted);max-width:760px;line-height:1.9;margin:0}
+.hero-side{padding:22px;display:flex;flex-direction:column;justify-content:space-between}.mini-title{font-size:13px;color:var(--muted)}.big-number{font-size:34px;font-weight:800;margin-top:6px}.small{font-size:12px;color:var(--muted);line-height:1.8}
+.tabs{display:flex;gap:8px;padding:7px;background:rgba(8,20,34,.72);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;position:sticky;top:10px;z-index:20;backdrop-filter:blur(16px)}
+.tab{flex:1;border:0;background:transparent;color:var(--muted);padding:12px;border-radius:13px;transition:.2s}.tab.active{background:linear-gradient(135deg,rgba(67,210,194,.18),rgba(109,140,255,.18));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.section{display:none}.section.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.planner-form{grid-column:span 5;padding:22px}.planner-result{grid-column:span 7;padding:22px;min-height:430px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:#bad0e5}
+.input{width:100%;background:#071727;border:1px solid rgba(255,255,255,.10);color:#fff;border-radius:14px;padding:12px 13px;outline:none;transition:.2s}.station-select{cursor:pointer;appearance:auto}.station-select option{background:#10233a;color:#fff}.input:focus{border-color:rgba(67,210,194,.62);box-shadow:0 0 0 4px rgba(67,210,194,.08)}
+.swap{align-self:end;height:46px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.05);color:#dcecff}.swap:hover{background:rgba(255,255,255,.09)}
+.primary{width:100%;margin-top:14px;border:0;border-radius:15px;padding:13px 16px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04121e;font-weight:800;box-shadow:0 14px 30px rgba(67,210,194,.16)}
+.secondary{border:1px solid var(--border);border-radius:13px;padding:10px 13px;background:rgba(255,255,255,.05);color:var(--text)}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.section-title h2,.section-title h3{margin:0;font-size:17px}.hint{font-size:12px;color:var(--muted)}
+.empty{display:grid;place-items:center;min-height:310px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,.12);border-radius:20px;padding:22px}.empty .icon{font-size:44px;margin-bottom:10px}
+.best{border:1px solid rgba(67,210,194,.22);background:linear-gradient(135deg,rgba(67,210,194,.11),rgba(109,140,255,.07));border-radius:20px;padding:18px;margin-bottom:14px}.best-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.route-name{font-weight:800;line-height:1.8}.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:6px 9px;border:1px solid var(--border);color:#d6e7f7;background:rgba(255,255,255,.04)}.badge.ok{color:#bdf4d3;background:rgba(98,216,151,.10);border-color:rgba(98,216,151,.2)}.badge.warn{color:#ffe2aa;background:rgba(255,204,102,.10);border-color:rgba(255,204,102,.2)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}.metric{background:rgba(4,15,27,.55);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px}.metric .v{font-size:18px;font-weight:800}.metric .k{font-size:10px;color:var(--muted);margin-top:4px}
+.timeline{margin-top:16px}.step{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;position:relative;padding-bottom:14px}.step:not(:last-child):before{content:"";position:absolute;right:12px;top:24px;bottom:-2px;width:2px;background:rgba(255,255,255,.09)}.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;border:2px solid rgba(255,255,255,.25);background:#10243a}.step-title{font-size:13px;font-weight:700}.step-sub{font-size:11px;color:var(--muted);margin-top:4px}.time{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px}
+.alt-list{display:grid;gap:10px}.alt{border:1px solid rgba(255,255,255,.08);background:rgba(5,17,30,.48);border-radius:17px;padding:14px}.alt-top{display:flex;justify-content:space-between;gap:10px}.alt-route{font-size:13px;font-weight:700;line-height:1.7}.alt-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.line-chip{display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:27px;padding:0 9px;border-radius:999px;color:white;font-weight:900;font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}.l1{background:var(--line1)}.l3{background:var(--line3)}.l6{background:var(--line6)}.l7{background:var(--line7)}
+.table-card{padding:20px}.toolbar{display:grid;grid-template-columns:1.25fr 1.25fr .8fr .8fr .8fr .9fr auto;gap:9px;align-items:end;margin-bottom:14px}.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:18px}.data-table{width:100%;border-collapse:collapse;min-width:900px;background:rgba(5,16,28,.45)}.data-table th,.data-table td{padding:12px 13px;text-align:right;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px}.data-table th{position:sticky;top:0;background:#10243a;color:#bfd2e5;z-index:1}.data-table tr:hover td{background:rgba(255,255,255,.025)}.route-lines{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.settings{padding:22px}.setting-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.setting-box{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(5,17,30,.42)}.setting-box h4{margin:0 0 10px;font-size:13px}.note{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(255,204,102,.08);border:1px solid rgba(255,204,102,.16);color:#f4dca6;font-size:12px;line-height:1.8}
+.toast{position:fixed;left:20px;bottom:20px;max-width:340px;background:#0e2238;color:#fff;border:1px solid var(--border);padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:100}.toast.show{opacity:1;transform:translateY(0)}
+.footer{color:#7f96aa;text-align:center;font-size:11px;margin-top:24px;line-height:1.8}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.planner-form,.planner-result{grid-column:1/-1}.toolbar{grid-template-columns:1fr 1fr}.toolbar .wide{grid-column:1/-1}.setting-grid{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr 1fr}.tabs{top:6px}}
+@media(max-width:560px){.shell{width:min(100% - 18px,1180px);padding-top:14px}.hero-main,.hero-side,.planner-form,.planner-result,.settings,.table-card{padding:16px}.form-grid,.toolbar,.setting-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.tab{font-size:12px;padding:10px 6px}.hero-side{display:none}h1{font-size:29px}.best-head{flex-direction:column}.toolbar .wide{grid-column:auto}}
+
+.l2{background:#244ca0}.l4,.l104{background:#f4cf24;color:#182334}.l5,.l105{background:#248348}.l101{background:var(--line1)}
+.dot{font-size:9px;overflow:hidden}.picker{position:relative;min-width:0}.picker-menu{position:absolute;top:100%;right:0;left:0;margin-top:5px;background:#10233a;border:1px solid #456477;border-radius:14px;max-height:270px;overflow-y:auto;z-index:50;box-shadow:0 12px 30px #0008}.picker-option{padding:11px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #ffffff0d}.picker-option[aria-selected="true"]{background:#24505a}.picker-option small{display:block;color:#adc4d7;margin-top:5px}.picker-empty{padding:15px;color:#bad0e5;font-size:12px}.picker-clear{position:absolute;left:8px;top:8px;color:#c1d6e8;background:transparent;border:0;padding:4px 8px;font-size:20px}.picker input{padding-left:38px}.planner-form{position:relative;z-index:2}.picker input[aria-invalid="true"]{border-color:var(--danger)}
+.direction-flow{display:inline-flex;flex-direction:row;direction:rtl;align-items:center;gap:.35em;unicode-bidi:isolate;vertical-align:baseline}.direction-flow>bdi{unicode-bidi:isolate}.direction-flow.time-flow{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero">
+    <div class="card hero-main">
+      <span class="kicker">🚇 موتور برنامه‌ریزی مسیر • خطوط ۱ تا ۷ + انشعاب‌های پرند، مهرآباد و هشتگرد</span>
+      <h1>مسیریاب هوشمند مترو تهران</h1>
+      <p>مبدأ و مقصد را از فهرست ایستگاه‌ها انتخاب کن و ساعت حضورت را بده. برنامه مسیرها را با زمان‌بندی قطارها، زمان تعویض، ساعات پیک، شلوغی تخمینی و ریسک اتصال مقایسه می‌کند و بهترین گزینه و جایگزین‌ها را نشان می‌دهد.</p>
+    </div>
+    <aside class="card hero-side">
+      <div><div class="mini-title">حالت پیش‌فرض</div><div class="big-number">متعادل</div></div>
+      <div class="small">زمان رسیدن + شلوغی + انتظار + تعداد تعویض + پایداری اتصال، هم‌زمان در امتیاز نهایی اثر می‌گذارند.</div>
+    </aside>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="planner">برنامه‌ریز مسیر</button>
+    <button class="tab" data-tab="schedule">جدول حرکت</button>
+    <button class="tab" data-tab="settings">تنظیمات</button>
+  </nav>
+
+  <section id="planner" class="section active">
+    <div class="grid">
+      <div class="card planner-form">
+        <div class="section-title"><h2>مسیر جدید</h2><span class="hint">ورودی ساده، محاسبه خودکار</span></div>
+        <div class="form-grid">
+          <div class="field"><label for="origin">مبدأ</label><select id="origin" class="input station-select" aria-label="ایستگاه مبدأ">
+<option value="آزادگان">آزادگان — ۳</option>
+<option value="آهنگ">آهنگ — ۷</option>
+<option value="آیت‌الله طالقانی">آیت‌الله طالقانی — ۱</option>
+<option value="ابن سینا">ابن سینا — ۴</option>
+<option value="اتمسفر">اتمسفر — ۵</option>
+<option value="ارم سبز">ارم سبز — ۴ / ۵</option>
+<option value="استاد معین">استاد معین — ۴</option>
+<option value="اقدسیه">اقدسیه — ۳</option>
+<option value="امام حسین">امام حسین — ۶ / ۲</option>
+<option value="امام خمینی">امام خمینی — ۱ / ۲</option>
+<option value="امیرکبیر">امیرکبیر — ۶</option>
+<option value="ایران‌خودرو">ایران‌خودرو — ۵</option>
+<option value="برج میلاد تهران">برج میلاد تهران — ۷</option>
+<option value="بریانک">بریانک — ۷</option>
+<option value="بسیج">بسیج — ۷</option>
+<option value="بعثت">بعثت — ۶</option>
+<option value="بهار شیراز">بهار شیراز — ۶</option>
+<option value="بهارستان">بهارستان — ۲</option>
+<option value="بوستان لاله">بوستان لاله — ۶</option>
+<option value="بوستان گفتگو">بوستان گفتگو — ۷</option>
+<option value="بیمه">بیمه — ۴ / انشعاب ۴ · مهرآباد</option>
+<option value="تئاتر شهر">تئاتر شهر — ۳ / ۴</option>
+<option value="تجریش">تجریش — ۱</option>
+<option value="تهران (صادقیه)">تهران (صادقیه) — ۲ / ۵</option>
+<option value="تهرانپارس">تهرانپارس — ۲</option>
+<option value="توحید">توحید — ۷ / ۴</option>
+<option value="جانبازان">جانبازان — ۲</option>
+<option value="جوادیه">جوادیه — ۳</option>
+<option value="جوانمرد قصاب">جوانمرد قصاب — ۱</option>
+<option value="حرم مطهر امام خمینی">حرم مطهر امام خمینی — ۱</option>
+<option value="حسن‌آباد">حسن‌آباد — ۲</option>
+<option value="حسین‌آباد">حسین‌آباد — ۳</option>
+<option value="خواجه عبدالله انصاری">خواجه عبدالله انصاری — ۳</option>
+<option value="خیام">خیام — ۱</option>
+<option value="دانشگاه امام علی">دانشگاه امام علی — ۲</option>
+<option value="دانشگاه تربیت مدرس">دانشگاه تربیت مدرس — ۶ / ۷</option>
+<option value="دانشگاه شریف">دانشگاه شریف — ۲</option>
+<option value="دانشگاه علم و صنعت">دانشگاه علم و صنعت — ۲</option>
+<option value="دروازه دولت">دروازه دولت — ۱ / ۴</option>
+<option value="دروازه شمیران">دروازه شمیران — ۲ / ۴</option>
+<option value="دکتر حبیب‌الله">دکتر حبیب‌الله — ۴</option>
+<option value="دکتر شریعتی">دکتر شریعتی — ۱</option>
+<option value="راه‌آهن">راه‌آهن — ۳</option>
+<option value="رودکی">رودکی — ۷</option>
+<option value="زمزم">زمزم — ۳</option>
+<option value="سبلان">سبلان — ۲</option>
+<option value="سرباز وطن">سرباز وطن — ۶</option>
+<option value="سرسبز">سرسبز — ۲</option>
+<option value="سعدی">سعدی — ۱</option>
+<option value="سهروردی">سهروردی — ۳</option>
+<option value="شادمان">شادمان — ۲ / ۴</option>
+<option value="شاهد - باقرشهر">شاهد - باقرشهر — ۱ / انشعاب ۱ · پرند</option>
+<option value="شهدای دولت‌آباد">شهدای دولت‌آباد — ۶</option>
+<option value="شهدای هفتم تیر">شهدای هفتم تیر — ۱ / ۶</option>
+<option value="شهدای هفده شهریور">شهدای هفده شهریور — ۷</option>
+<option value="شهدای کن">شهدای کن — ۶</option>
+<option value="شهر زیبا">شهر زیبا — ۶</option>
+<option value="شهر پرند">شهر پرند — انشعاب ۱ · پرند</option>
+<option value="شهران">شهران — ۶</option>
+<option value="شهرری" selected>شهرری — ۱</option>
+<option value="شهرک آزمایش">شهرک آزمایش — ۶</option>
+<option value="شهرک اکباتان">شهرک اکباتان — ۴</option>
+<option value="شهرک شریعتی">شهرک شریعتی — ۳</option>
+<option value="شهید آرمان علی‌وردی">شهید آرمان علی‌وردی — ۶</option>
+<option value="شهید اشرفی اصفهانی">شهید اشرفی اصفهانی — ۶</option>
+<option value="شهید باقری">شهید باقری — ۲</option>
+<option value="شهید بخارایی">شهید بخارایی — ۱</option>
+<option value="شهید بهشتی">شهید بهشتی — ۱ / ۳</option>
+<option value="شهید حقانی">شهید حقانی — ۱</option>
+<option value="شهید دادمان">شهید دادمان — ۷</option>
+<option value="شهید رضایی">شهید رضایی — ۶</option>
+<option value="شهید زین‌الدین">شهید زین‌الدین — ۳</option>
+<option value="شهید ستاری">شهید ستاری — ۶</option>
+<option value="شهید صدر">شهید صدر — ۱</option>
+<option value="شهید صیاد شیرازی">شهید صیاد شیرازی — ۳</option>
+<option value="شهید فخری‌زاده">شهید فخری‌زاده — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قاسم سلیمانی (هشتگرد)">شهید قاسم سلیمانی (هشتگرد) — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قدوسی">شهید قدوسی — ۳</option>
+<option value="شهید محلاتی">شهید محلاتی — ۳</option>
+<option value="شهید مدنی">شهید مدنی — ۲</option>
+<option value="شهید مفتح">شهید مفتح — ۱</option>
+<option value="شهید نواب صفوی">شهید نواب صفوی — ۷ / ۲</option>
+<option value="شهید همت">شهید همت — ۱</option>
+<option value="شهید کلاهدوز">شهید کلاهدوز — ۴</option>
+<option value="شوش">شوش — ۱</option>
+<option value="طرشت">طرشت — ۲</option>
+<option value="عبدل‌آباد">عبدل‌آباد — ۳</option>
+<option value="علامه جعفری">علامه جعفری — ۴</option>
+<option value="علی‌آباد">علی‌آباد — ۱</option>
+<option value="فدک">فدک — ۲</option>
+<option value="فردوسی">فردوسی — ۴</option>
+<option value="فرهنگ‌سرا">فرهنگ‌سرا — ۲</option>
+<option value="فرودگاه امام خمینی">فرودگاه امام خمینی — انشعاب ۱ · پرند</option>
+<option value="قائم">قائم — ۳</option>
+<option value="قلهک">قلهک — ۱</option>
+<option value="قیطریه">قیطریه — ۱</option>
+<option value="محمدشهر">محمدشهر — ۵</option>
+<option value="مدافعان سلامت">مدافعان سلامت — ۷</option>
+<option value="مرزداران">مرزداران — ۶</option>
+<option value="مریم مقدس">مریم مقدس — ۶</option>
+<option value="مصلی امام خمینی">مصلی امام خمینی — ۱</option>
+<option value="ملت">ملت — ۲</option>
+<option value="منیریه">منیریه — ۳</option>
+<option value="مهدیه">مهدیه — ۳ / ۷</option>
+<option value="مولوی">مولوی — ۷</option>
+<option value="میدان آزادی">میدان آزادی — ۴</option>
+<option value="میدان انقلاب اسلامی">میدان انقلاب اسلامی — ۴</option>
+<option value="میدان جهاد">میدان جهاد — ۳</option>
+<option value="میدان حر">میدان حر — ۲</option>
+<option value="میدان خراسان">میدان خراسان — ۶</option>
+<option value="میدان شهدا">میدان شهدا — ۶ / ۴</option>
+<option value="میدان صنعت">میدان صنعت — ۷</option>
+<option value="میدان قیام">میدان قیام — ۷</option>
+<option value="میدان محمدیه">میدان محمدیه — ۱ / ۷</option>
+<option value="میدان هروی">میدان هروی — ۳</option>
+<option value="میدان ولیعصر">میدان ولیعصر — ۳ / ۶</option>
+<option value="میدان کتاب">میدان کتاب — ۷</option>
+<option value="میرداماد">میرداماد — ۱</option>
+<option value="میرزای شیرازی">میرزای شیرازی — ۳</option>
+<option value="نبرد">نبرد — ۴</option>
+<option value="نعمت‌آباد">نعمت‌آباد — ۳</option>
+<option value="نمایشگاه شهر آفتاب">نمایشگاه شهر آفتاب — انشعاب ۱ · پرند</option>
+<option value="نوبنیاد">نوبنیاد — ۳</option>
+<option value="نیروی هوایی">نیروی هوایی — ۴</option>
+<option value="هلال احمر">هلال احمر — ۷</option>
+<option value="وردآورد">وردآورد — ۵</option>
+<option value="ورزشگاه آزادی">ورزشگاه آزادی — ۵</option>
+<option value="پالایشگاه">پالایشگاه — ۱</option>
+<option value="پانزده خرداد">پانزده خرداد — ۱</option>
+<option value="پایانه جنوب">پایانه جنوب — ۱</option>
+<option value="پایانه ۱ و ۲ فرودگاه مهرآباد">پایانه ۱ و ۲ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پایانه ۴ و ۶ فرودگاه مهرآباد">پایانه ۴ و ۶ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پیروزی">پیروزی — ۴</option>
+<option value="چهل‌تن دولاب">چهل‌تن دولاب — ۷</option>
+<option value="چیتگر">چیتگر — ۵</option>
+<option value="کارگر">کارگر — ۶</option>
+<option value="کرج">کرج — ۵</option>
+<option value="کمیل">کمیل — ۷</option>
+<option value="کهریزک">کهریزک — ۱</option>
+<option value="کیان‌شهر">کیان‌شهر — ۶</option>
+<option value="گرم‌دره">گرم‌دره — ۵</option>
+<option value="گلشهر">گلشهر — ۵ / انشعاب ۵ · هشتگرد</option>
+<option value="یادگار امام">یادگار امام — ۶</option>
+</select></div>
+          <button type="button" id="swapBtn" class="swap" title="جابجایی مبدأ و مقصد">⇄</button>
+          <div class="field"><label for="destination">مقصد</label><select id="destination" class="input station-select" aria-label="ایستگاه مقصد">
+<option value="آزادگان">آزادگان — ۳</option>
+<option value="آهنگ">آهنگ — ۷</option>
+<option value="آیت‌الله طالقانی">آیت‌الله طالقانی — ۱</option>
+<option value="ابن سینا">ابن سینا — ۴</option>
+<option value="اتمسفر">اتمسفر — ۵</option>
+<option value="ارم سبز">ارم سبز — ۴ / ۵</option>
+<option value="استاد معین">استاد معین — ۴</option>
+<option value="اقدسیه">اقدسیه — ۳</option>
+<option value="امام حسین">امام حسین — ۶ / ۲</option>
+<option value="امام خمینی">امام خمینی — ۱ / ۲</option>
+<option value="امیرکبیر">امیرکبیر — ۶</option>
+<option value="ایران‌خودرو">ایران‌خودرو — ۵</option>
+<option value="برج میلاد تهران">برج میلاد تهران — ۷</option>
+<option value="بریانک">بریانک — ۷</option>
+<option value="بسیج">بسیج — ۷</option>
+<option value="بعثت">بعثت — ۶</option>
+<option value="بهار شیراز">بهار شیراز — ۶</option>
+<option value="بهارستان">بهارستان — ۲</option>
+<option value="بوستان لاله">بوستان لاله — ۶</option>
+<option value="بوستان گفتگو">بوستان گفتگو — ۷</option>
+<option value="بیمه">بیمه — ۴ / انشعاب ۴ · مهرآباد</option>
+<option value="تئاتر شهر">تئاتر شهر — ۳ / ۴</option>
+<option value="تجریش">تجریش — ۱</option>
+<option value="تهران (صادقیه)">تهران (صادقیه) — ۲ / ۵</option>
+<option value="تهرانپارس">تهرانپارس — ۲</option>
+<option value="توحید">توحید — ۷ / ۴</option>
+<option value="جانبازان">جانبازان — ۲</option>
+<option value="جوادیه">جوادیه — ۳</option>
+<option value="جوانمرد قصاب">جوانمرد قصاب — ۱</option>
+<option value="حرم مطهر امام خمینی">حرم مطهر امام خمینی — ۱</option>
+<option value="حسن‌آباد">حسن‌آباد — ۲</option>
+<option value="حسین‌آباد">حسین‌آباد — ۳</option>
+<option value="خواجه عبدالله انصاری">خواجه عبدالله انصاری — ۳</option>
+<option value="خیام">خیام — ۱</option>
+<option value="دانشگاه امام علی">دانشگاه امام علی — ۲</option>
+<option value="دانشگاه تربیت مدرس">دانشگاه تربیت مدرس — ۶ / ۷</option>
+<option value="دانشگاه شریف">دانشگاه شریف — ۲</option>
+<option value="دانشگاه علم و صنعت">دانشگاه علم و صنعت — ۲</option>
+<option value="دروازه دولت">دروازه دولت — ۱ / ۴</option>
+<option value="دروازه شمیران">دروازه شمیران — ۲ / ۴</option>
+<option value="دکتر حبیب‌الله">دکتر حبیب‌الله — ۴</option>
+<option value="دکتر شریعتی">دکتر شریعتی — ۱</option>
+<option value="راه‌آهن">راه‌آهن — ۳</option>
+<option value="رودکی">رودکی — ۷</option>
+<option value="زمزم">زمزم — ۳</option>
+<option value="سبلان">سبلان — ۲</option>
+<option value="سرباز وطن">سرباز وطن — ۶</option>
+<option value="سرسبز">سرسبز — ۲</option>
+<option value="سعدی">سعدی — ۱</option>
+<option value="سهروردی">سهروردی — ۳</option>
+<option value="شادمان">شادمان — ۲ / ۴</option>
+<option value="شاهد - باقرشهر">شاهد - باقرشهر — ۱ / انشعاب ۱ · پرند</option>
+<option value="شهدای دولت‌آباد">شهدای دولت‌آباد — ۶</option>
+<option value="شهدای هفتم تیر">شهدای هفتم تیر — ۱ / ۶</option>
+<option value="شهدای هفده شهریور">شهدای هفده شهریور — ۷</option>
+<option value="شهدای کن">شهدای کن — ۶</option>
+<option value="شهر زیبا">شهر زیبا — ۶</option>
+<option value="شهر پرند">شهر پرند — انشعاب ۱ · پرند</option>
+<option value="شهران">شهران — ۶</option>
+<option value="شهرری">شهرری — ۱</option>
+<option value="شهرک آزمایش">شهرک آزمایش — ۶</option>
+<option value="شهرک اکباتان">شهرک اکباتان — ۴</option>
+<option value="شهرک شریعتی">شهرک شریعتی — ۳</option>
+<option value="شهید آرمان علی‌وردی">شهید آرمان علی‌وردی — ۶</option>
+<option value="شهید اشرفی اصفهانی">شهید اشرفی اصفهانی — ۶</option>
+<option value="شهید باقری">شهید باقری — ۲</option>
+<option value="شهید بخارایی">شهید بخارایی — ۱</option>
+<option value="شهید بهشتی">شهید بهشتی — ۱ / ۳</option>
+<option value="شهید حقانی">شهید حقانی — ۱</option>
+<option value="شهید دادمان">شهید دادمان — ۷</option>
+<option value="شهید رضایی">شهید رضایی — ۶</option>
+<option value="شهید زین‌الدین">شهید زین‌الدین — ۳</option>
+<option value="شهید ستاری">شهید ستاری — ۶</option>
+<option value="شهید صدر">شهید صدر — ۱</option>
+<option value="شهید صیاد شیرازی">شهید صیاد شیرازی — ۳</option>
+<option value="شهید فخری‌زاده">شهید فخری‌زاده — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قاسم سلیمانی (هشتگرد)">شهید قاسم سلیمانی (هشتگرد) — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قدوسی">شهید قدوسی — ۳</option>
+<option value="شهید محلاتی">شهید محلاتی — ۳</option>
+<option value="شهید مدنی">شهید مدنی — ۲</option>
+<option value="شهید مفتح">شهید مفتح — ۱</option>
+<option value="شهید نواب صفوی">شهید نواب صفوی — ۷ / ۲</option>
+<option value="شهید همت">شهید همت — ۱</option>
+<option value="شهید کلاهدوز">شهید کلاهدوز — ۴</option>
+<option value="شوش">شوش — ۱</option>
+<option value="طرشت">طرشت — ۲</option>
+<option value="عبدل‌آباد">عبدل‌آباد — ۳</option>
+<option value="علامه جعفری">علامه جعفری — ۴</option>
+<option value="علی‌آباد">علی‌آباد — ۱</option>
+<option value="فدک">فدک — ۲</option>
+<option value="فردوسی">فردوسی — ۴</option>
+<option value="فرهنگ‌سرا">فرهنگ‌سرا — ۲</option>
+<option value="فرودگاه امام خمینی">فرودگاه امام خمینی — انشعاب ۱ · پرند</option>
+<option value="قائم">قائم — ۳</option>
+<option value="قلهک">قلهک — ۱</option>
+<option value="قیطریه">قیطریه — ۱</option>
+<option value="محمدشهر">محمدشهر — ۵</option>
+<option value="مدافعان سلامت">مدافعان سلامت — ۷</option>
+<option value="مرزداران">مرزداران — ۶</option>
+<option value="مریم مقدس">مریم مقدس — ۶</option>
+<option value="مصلی امام خمینی">مصلی امام خمینی — ۱</option>
+<option value="ملت">ملت — ۲</option>
+<option value="منیریه">منیریه — ۳</option>
+<option value="مهدیه">مهدیه — ۳ / ۷</option>
+<option value="مولوی">مولوی — ۷</option>
+<option value="میدان آزادی">میدان آزادی — ۴</option>
+<option value="میدان انقلاب اسلامی">میدان انقلاب اسلامی — ۴</option>
+<option value="میدان جهاد">میدان جهاد — ۳</option>
+<option value="میدان حر">میدان حر — ۲</option>
+<option value="میدان خراسان">میدان خراسان — ۶</option>
+<option value="میدان شهدا">میدان شهدا — ۶ / ۴</option>
+<option value="میدان صنعت">میدان صنعت — ۷</option>
+<option value="میدان قیام">میدان قیام — ۷</option>
+<option value="میدان محمدیه">میدان محمدیه — ۱ / ۷</option>
+<option value="میدان هروی">میدان هروی — ۳</option>
+<option value="میدان ولیعصر" selected>میدان ولیعصر — ۳ / ۶</option>
+<option value="میدان کتاب">میدان کتاب — ۷</option>
+<option value="میرداماد">میرداماد — ۱</option>
+<option value="میرزای شیرازی">میرزای شیرازی — ۳</option>
+<option value="نبرد">نبرد — ۴</option>
+<option value="نعمت‌آباد">نعمت‌آباد — ۳</option>
+<option value="نمایشگاه شهر آفتاب">نمایشگاه شهر آفتاب — انشعاب ۱ · پرند</option>
+<option value="نوبنیاد">نوبنیاد — ۳</option>
+<option value="نیروی هوایی">نیروی هوایی — ۴</option>
+<option value="هلال احمر">هلال احمر — ۷</option>
+<option value="وردآورد">وردآورد — ۵</option>
+<option value="ورزشگاه آزادی">ورزشگاه آزادی — ۵</option>
+<option value="پالایشگاه">پالایشگاه — ۱</option>
+<option value="پانزده خرداد">پانزده خرداد — ۱</option>
+<option value="پایانه جنوب">پایانه جنوب — ۱</option>
+<option value="پایانه ۱ و ۲ فرودگاه مهرآباد">پایانه ۱ و ۲ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پایانه ۴ و ۶ فرودگاه مهرآباد">پایانه ۴ و ۶ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پیروزی">پیروزی — ۴</option>
+<option value="چهل‌تن دولاب">چهل‌تن دولاب — ۷</option>
+<option value="چیتگر">چیتگر — ۵</option>
+<option value="کارگر">کارگر — ۶</option>
+<option value="کرج">کرج — ۵</option>
+<option value="کمیل">کمیل — ۷</option>
+<option value="کهریزک">کهریزک — ۱</option>
+<option value="کیان‌شهر">کیان‌شهر — ۶</option>
+<option value="گرم‌دره">گرم‌دره — ۵</option>
+<option value="گلشهر">گلشهر — ۵ / انشعاب ۵ · هشتگرد</option>
+<option value="یادگار امام">یادگار امام — ۶</option>
+</select></div>
+          <div class="field"><label>ساعت حضور در مبدأ</label><input id="readyTime" class="input" type="time" value="08:00"></div>
+          <div class="field"><label>نوع روز</label><select id="dayType" class="input"><option value="weekday">شنبه تا چهارشنبه</option><option value="thursday">پنجشنبه</option><option value="friday">جمعه / تعطیل</option></select></div>
+          <div class="field full"><label>معیار انتخاب بهترین مسیر</label><select id="objective" class="input"><option value="balanced">متعادل — پیشنهاد اصلی</option><option value="fastest">سریع‌ترین</option><option value="quietest">خلوت‌ترین</option><option value="reliable">مطمئن‌ترین اتصال</option></select></div>
+        </div>
+        <button type="button" id="planBtn" class="primary">محاسبه بهترین مسیر</button>
+        <div class="note">زمان عبور در ایستگاه‌های میانی تخمینی است؛ داده عمومی معمولاً زمان اعزام از مبدأ و سرفاصله را منتشر می‌کند. برای دقت بیشتر، زمان‌های تعویض را در «تنظیمات» مطابق تجربه خودت وارد کن.</div>
+      </div>
+      <div class="card planner-result" id="plannerResult">
+        <div class="empty"><div><div class="icon">🧭</div><strong>مسیرت را وارد کن</strong><div class="small">بهترین گزینه و چند جایگزین اینجا نمایش داده می‌شوند.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="schedule" class="section">
+    <div class="card table-card">
+      <div class="section-title"><div><h2>جدول حرکت پیشنهادی</h2><div class="hint">از ساعت شروع تا انتهای بازه، حرکت‌های پیشنهادی و زمان رسیدن را می‌سازد.</div></div><button type="button" id="exportBtn" class="secondary">دانلود CSV</button></div>
+      <div class="toolbar">
+        <div class="field"><label for="tableOrigin">مبدأ</label><select id="tableOrigin" class="input station-select" aria-label="ایستگاه مبدأ جدول">
+<option value="آزادگان">آزادگان — ۳</option>
+<option value="آهنگ">آهنگ — ۷</option>
+<option value="آیت‌الله طالقانی">آیت‌الله طالقانی — ۱</option>
+<option value="ابن سینا">ابن سینا — ۴</option>
+<option value="اتمسفر">اتمسفر — ۵</option>
+<option value="ارم سبز">ارم سبز — ۴ / ۵</option>
+<option value="استاد معین">استاد معین — ۴</option>
+<option value="اقدسیه">اقدسیه — ۳</option>
+<option value="امام حسین">امام حسین — ۶ / ۲</option>
+<option value="امام خمینی">امام خمینی — ۱ / ۲</option>
+<option value="امیرکبیر">امیرکبیر — ۶</option>
+<option value="ایران‌خودرو">ایران‌خودرو — ۵</option>
+<option value="برج میلاد تهران">برج میلاد تهران — ۷</option>
+<option value="بریانک">بریانک — ۷</option>
+<option value="بسیج">بسیج — ۷</option>
+<option value="بعثت">بعثت — ۶</option>
+<option value="بهار شیراز">بهار شیراز — ۶</option>
+<option value="بهارستان">بهارستان — ۲</option>
+<option value="بوستان لاله">بوستان لاله — ۶</option>
+<option value="بوستان گفتگو">بوستان گفتگو — ۷</option>
+<option value="بیمه">بیمه — ۴ / انشعاب ۴ · مهرآباد</option>
+<option value="تئاتر شهر">تئاتر شهر — ۳ / ۴</option>
+<option value="تجریش">تجریش — ۱</option>
+<option value="تهران (صادقیه)">تهران (صادقیه) — ۲ / ۵</option>
+<option value="تهرانپارس">تهرانپارس — ۲</option>
+<option value="توحید">توحید — ۷ / ۴</option>
+<option value="جانبازان">جانبازان — ۲</option>
+<option value="جوادیه">جوادیه — ۳</option>
+<option value="جوانمرد قصاب">جوانمرد قصاب — ۱</option>
+<option value="حرم مطهر امام خمینی">حرم مطهر امام خمینی — ۱</option>
+<option value="حسن‌آباد">حسن‌آباد — ۲</option>
+<option value="حسین‌آباد">حسین‌آباد — ۳</option>
+<option value="خواجه عبدالله انصاری">خواجه عبدالله انصاری — ۳</option>
+<option value="خیام">خیام — ۱</option>
+<option value="دانشگاه امام علی">دانشگاه امام علی — ۲</option>
+<option value="دانشگاه تربیت مدرس">دانشگاه تربیت مدرس — ۶ / ۷</option>
+<option value="دانشگاه شریف">دانشگاه شریف — ۲</option>
+<option value="دانشگاه علم و صنعت">دانشگاه علم و صنعت — ۲</option>
+<option value="دروازه دولت">دروازه دولت — ۱ / ۴</option>
+<option value="دروازه شمیران">دروازه شمیران — ۲ / ۴</option>
+<option value="دکتر حبیب‌الله">دکتر حبیب‌الله — ۴</option>
+<option value="دکتر شریعتی">دکتر شریعتی — ۱</option>
+<option value="راه‌آهن">راه‌آهن — ۳</option>
+<option value="رودکی">رودکی — ۷</option>
+<option value="زمزم">زمزم — ۳</option>
+<option value="سبلان">سبلان — ۲</option>
+<option value="سرباز وطن">سرباز وطن — ۶</option>
+<option value="سرسبز">سرسبز — ۲</option>
+<option value="سعدی">سعدی — ۱</option>
+<option value="سهروردی">سهروردی — ۳</option>
+<option value="شادمان">شادمان — ۲ / ۴</option>
+<option value="شاهد - باقرشهر">شاهد - باقرشهر — ۱ / انشعاب ۱ · پرند</option>
+<option value="شهدای دولت‌آباد">شهدای دولت‌آباد — ۶</option>
+<option value="شهدای هفتم تیر">شهدای هفتم تیر — ۱ / ۶</option>
+<option value="شهدای هفده شهریور">شهدای هفده شهریور — ۷</option>
+<option value="شهدای کن">شهدای کن — ۶</option>
+<option value="شهر زیبا">شهر زیبا — ۶</option>
+<option value="شهر پرند">شهر پرند — انشعاب ۱ · پرند</option>
+<option value="شهران">شهران — ۶</option>
+<option value="شهرری" selected>شهرری — ۱</option>
+<option value="شهرک آزمایش">شهرک آزمایش — ۶</option>
+<option value="شهرک اکباتان">شهرک اکباتان — ۴</option>
+<option value="شهرک شریعتی">شهرک شریعتی — ۳</option>
+<option value="شهید آرمان علی‌وردی">شهید آرمان علی‌وردی — ۶</option>
+<option value="شهید اشرفی اصفهانی">شهید اشرفی اصفهانی — ۶</option>
+<option value="شهید باقری">شهید باقری — ۲</option>
+<option value="شهید بخارایی">شهید بخارایی — ۱</option>
+<option value="شهید بهشتی">شهید بهشتی — ۱ / ۳</option>
+<option value="شهید حقانی">شهید حقانی — ۱</option>
+<option value="شهید دادمان">شهید دادمان — ۷</option>
+<option value="شهید رضایی">شهید رضایی — ۶</option>
+<option value="شهید زین‌الدین">شهید زین‌الدین — ۳</option>
+<option value="شهید ستاری">شهید ستاری — ۶</option>
+<option value="شهید صدر">شهید صدر — ۱</option>
+<option value="شهید صیاد شیرازی">شهید صیاد شیرازی — ۳</option>
+<option value="شهید فخری‌زاده">شهید فخری‌زاده — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قاسم سلیمانی (هشتگرد)">شهید قاسم سلیمانی (هشتگرد) — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قدوسی">شهید قدوسی — ۳</option>
+<option value="شهید محلاتی">شهید محلاتی — ۳</option>
+<option value="شهید مدنی">شهید مدنی — ۲</option>
+<option value="شهید مفتح">شهید مفتح — ۱</option>
+<option value="شهید نواب صفوی">شهید نواب صفوی — ۷ / ۲</option>
+<option value="شهید همت">شهید همت — ۱</option>
+<option value="شهید کلاهدوز">شهید کلاهدوز — ۴</option>
+<option value="شوش">شوش — ۱</option>
+<option value="طرشت">طرشت — ۲</option>
+<option value="عبدل‌آباد">عبدل‌آباد — ۳</option>
+<option value="علامه جعفری">علامه جعفری — ۴</option>
+<option value="علی‌آباد">علی‌آباد — ۱</option>
+<option value="فدک">فدک — ۲</option>
+<option value="فردوسی">فردوسی — ۴</option>
+<option value="فرهنگ‌سرا">فرهنگ‌سرا — ۲</option>
+<option value="فرودگاه امام خمینی">فرودگاه امام خمینی — انشعاب ۱ · پرند</option>
+<option value="قائم">قائم — ۳</option>
+<option value="قلهک">قلهک — ۱</option>
+<option value="قیطریه">قیطریه — ۱</option>
+<option value="محمدشهر">محمدشهر — ۵</option>
+<option value="مدافعان سلامت">مدافعان سلامت — ۷</option>
+<option value="مرزداران">مرزداران — ۶</option>
+<option value="مریم مقدس">مریم مقدس — ۶</option>
+<option value="مصلی امام خمینی">مصلی امام خمینی — ۱</option>
+<option value="ملت">ملت — ۲</option>
+<option value="منیریه">منیریه — ۳</option>
+<option value="مهدیه">مهدیه — ۳ / ۷</option>
+<option value="مولوی">مولوی — ۷</option>
+<option value="میدان آزادی">میدان آزادی — ۴</option>
+<option value="میدان انقلاب اسلامی">میدان انقلاب اسلامی — ۴</option>
+<option value="میدان جهاد">میدان جهاد — ۳</option>
+<option value="میدان حر">میدان حر — ۲</option>
+<option value="میدان خراسان">میدان خراسان — ۶</option>
+<option value="میدان شهدا">میدان شهدا — ۶ / ۴</option>
+<option value="میدان صنعت">میدان صنعت — ۷</option>
+<option value="میدان قیام">میدان قیام — ۷</option>
+<option value="میدان محمدیه">میدان محمدیه — ۱ / ۷</option>
+<option value="میدان هروی">میدان هروی — ۳</option>
+<option value="میدان ولیعصر">میدان ولیعصر — ۳ / ۶</option>
+<option value="میدان کتاب">میدان کتاب — ۷</option>
+<option value="میرداماد">میرداماد — ۱</option>
+<option value="میرزای شیرازی">میرزای شیرازی — ۳</option>
+<option value="نبرد">نبرد — ۴</option>
+<option value="نعمت‌آباد">نعمت‌آباد — ۳</option>
+<option value="نمایشگاه شهر آفتاب">نمایشگاه شهر آفتاب — انشعاب ۱ · پرند</option>
+<option value="نوبنیاد">نوبنیاد — ۳</option>
+<option value="نیروی هوایی">نیروی هوایی — ۴</option>
+<option value="هلال احمر">هلال احمر — ۷</option>
+<option value="وردآورد">وردآورد — ۵</option>
+<option value="ورزشگاه آزادی">ورزشگاه آزادی — ۵</option>
+<option value="پالایشگاه">پالایشگاه — ۱</option>
+<option value="پانزده خرداد">پانزده خرداد — ۱</option>
+<option value="پایانه جنوب">پایانه جنوب — ۱</option>
+<option value="پایانه ۱ و ۲ فرودگاه مهرآباد">پایانه ۱ و ۲ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پایانه ۴ و ۶ فرودگاه مهرآباد">پایانه ۴ و ۶ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پیروزی">پیروزی — ۴</option>
+<option value="چهل‌تن دولاب">چهل‌تن دولاب — ۷</option>
+<option value="چیتگر">چیتگر — ۵</option>
+<option value="کارگر">کارگر — ۶</option>
+<option value="کرج">کرج — ۵</option>
+<option value="کمیل">کمیل — ۷</option>
+<option value="کهریزک">کهریزک — ۱</option>
+<option value="کیان‌شهر">کیان‌شهر — ۶</option>
+<option value="گرم‌دره">گرم‌دره — ۵</option>
+<option value="گلشهر">گلشهر — ۵ / انشعاب ۵ · هشتگرد</option>
+<option value="یادگار امام">یادگار امام — ۶</option>
+</select></div>
+        <div class="field"><label for="tableDestination">مقصد</label><select id="tableDestination" class="input station-select" aria-label="ایستگاه مقصد جدول">
+<option value="آزادگان">آزادگان — ۳</option>
+<option value="آهنگ">آهنگ — ۷</option>
+<option value="آیت‌الله طالقانی">آیت‌الله طالقانی — ۱</option>
+<option value="ابن سینا">ابن سینا — ۴</option>
+<option value="اتمسفر">اتمسفر — ۵</option>
+<option value="ارم سبز">ارم سبز — ۴ / ۵</option>
+<option value="استاد معین">استاد معین — ۴</option>
+<option value="اقدسیه">اقدسیه — ۳</option>
+<option value="امام حسین">امام حسین — ۶ / ۲</option>
+<option value="امام خمینی">امام خمینی — ۱ / ۲</option>
+<option value="امیرکبیر">امیرکبیر — ۶</option>
+<option value="ایران‌خودرو">ایران‌خودرو — ۵</option>
+<option value="برج میلاد تهران">برج میلاد تهران — ۷</option>
+<option value="بریانک">بریانک — ۷</option>
+<option value="بسیج">بسیج — ۷</option>
+<option value="بعثت">بعثت — ۶</option>
+<option value="بهار شیراز">بهار شیراز — ۶</option>
+<option value="بهارستان">بهارستان — ۲</option>
+<option value="بوستان لاله">بوستان لاله — ۶</option>
+<option value="بوستان گفتگو">بوستان گفتگو — ۷</option>
+<option value="بیمه">بیمه — ۴ / انشعاب ۴ · مهرآباد</option>
+<option value="تئاتر شهر">تئاتر شهر — ۳ / ۴</option>
+<option value="تجریش">تجریش — ۱</option>
+<option value="تهران (صادقیه)">تهران (صادقیه) — ۲ / ۵</option>
+<option value="تهرانپارس">تهرانپارس — ۲</option>
+<option value="توحید">توحید — ۷ / ۴</option>
+<option value="جانبازان">جانبازان — ۲</option>
+<option value="جوادیه">جوادیه — ۳</option>
+<option value="جوانمرد قصاب">جوانمرد قصاب — ۱</option>
+<option value="حرم مطهر امام خمینی">حرم مطهر امام خمینی — ۱</option>
+<option value="حسن‌آباد">حسن‌آباد — ۲</option>
+<option value="حسین‌آباد">حسین‌آباد — ۳</option>
+<option value="خواجه عبدالله انصاری">خواجه عبدالله انصاری — ۳</option>
+<option value="خیام">خیام — ۱</option>
+<option value="دانشگاه امام علی">دانشگاه امام علی — ۲</option>
+<option value="دانشگاه تربیت مدرس">دانشگاه تربیت مدرس — ۶ / ۷</option>
+<option value="دانشگاه شریف">دانشگاه شریف — ۲</option>
+<option value="دانشگاه علم و صنعت">دانشگاه علم و صنعت — ۲</option>
+<option value="دروازه دولت">دروازه دولت — ۱ / ۴</option>
+<option value="دروازه شمیران">دروازه شمیران — ۲ / ۴</option>
+<option value="دکتر حبیب‌الله">دکتر حبیب‌الله — ۴</option>
+<option value="دکتر شریعتی">دکتر شریعتی — ۱</option>
+<option value="راه‌آهن">راه‌آهن — ۳</option>
+<option value="رودکی">رودکی — ۷</option>
+<option value="زمزم">زمزم — ۳</option>
+<option value="سبلان">سبلان — ۲</option>
+<option value="سرباز وطن">سرباز وطن — ۶</option>
+<option value="سرسبز">سرسبز — ۲</option>
+<option value="سعدی">سعدی — ۱</option>
+<option value="سهروردی">سهروردی — ۳</option>
+<option value="شادمان">شادمان — ۲ / ۴</option>
+<option value="شاهد - باقرشهر">شاهد - باقرشهر — ۱ / انشعاب ۱ · پرند</option>
+<option value="شهدای دولت‌آباد">شهدای دولت‌آباد — ۶</option>
+<option value="شهدای هفتم تیر">شهدای هفتم تیر — ۱ / ۶</option>
+<option value="شهدای هفده شهریور">شهدای هفده شهریور — ۷</option>
+<option value="شهدای کن">شهدای کن — ۶</option>
+<option value="شهر زیبا">شهر زیبا — ۶</option>
+<option value="شهر پرند">شهر پرند — انشعاب ۱ · پرند</option>
+<option value="شهران">شهران — ۶</option>
+<option value="شهرری">شهرری — ۱</option>
+<option value="شهرک آزمایش">شهرک آزمایش — ۶</option>
+<option value="شهرک اکباتان">شهرک اکباتان — ۴</option>
+<option value="شهرک شریعتی">شهرک شریعتی — ۳</option>
+<option value="شهید آرمان علی‌وردی">شهید آرمان علی‌وردی — ۶</option>
+<option value="شهید اشرفی اصفهانی">شهید اشرفی اصفهانی — ۶</option>
+<option value="شهید باقری">شهید باقری — ۲</option>
+<option value="شهید بخارایی">شهید بخارایی — ۱</option>
+<option value="شهید بهشتی">شهید بهشتی — ۱ / ۳</option>
+<option value="شهید حقانی">شهید حقانی — ۱</option>
+<option value="شهید دادمان">شهید دادمان — ۷</option>
+<option value="شهید رضایی">شهید رضایی — ۶</option>
+<option value="شهید زین‌الدین">شهید زین‌الدین — ۳</option>
+<option value="شهید ستاری">شهید ستاری — ۶</option>
+<option value="شهید صدر">شهید صدر — ۱</option>
+<option value="شهید صیاد شیرازی">شهید صیاد شیرازی — ۳</option>
+<option value="شهید فخری‌زاده">شهید فخری‌زاده — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قاسم سلیمانی (هشتگرد)">شهید قاسم سلیمانی (هشتگرد) — انشعاب ۵ · هشتگرد</option>
+<option value="شهید قدوسی">شهید قدوسی — ۳</option>
+<option value="شهید محلاتی">شهید محلاتی — ۳</option>
+<option value="شهید مدنی">شهید مدنی — ۲</option>
+<option value="شهید مفتح">شهید مفتح — ۱</option>
+<option value="شهید نواب صفوی">شهید نواب صفوی — ۷ / ۲</option>
+<option value="شهید همت">شهید همت — ۱</option>
+<option value="شهید کلاهدوز">شهید کلاهدوز — ۴</option>
+<option value="شوش">شوش — ۱</option>
+<option value="طرشت">طرشت — ۲</option>
+<option value="عبدل‌آباد">عبدل‌آباد — ۳</option>
+<option value="علامه جعفری">علامه جعفری — ۴</option>
+<option value="علی‌آباد">علی‌آباد — ۱</option>
+<option value="فدک">فدک — ۲</option>
+<option value="فردوسی">فردوسی — ۴</option>
+<option value="فرهنگ‌سرا">فرهنگ‌سرا — ۲</option>
+<option value="فرودگاه امام خمینی">فرودگاه امام خمینی — انشعاب ۱ · پرند</option>
+<option value="قائم">قائم — ۳</option>
+<option value="قلهک">قلهک — ۱</option>
+<option value="قیطریه">قیطریه — ۱</option>
+<option value="محمدشهر">محمدشهر — ۵</option>
+<option value="مدافعان سلامت">مدافعان سلامت — ۷</option>
+<option value="مرزداران">مرزداران — ۶</option>
+<option value="مریم مقدس">مریم مقدس — ۶</option>
+<option value="مصلی امام خمینی">مصلی امام خمینی — ۱</option>
+<option value="ملت">ملت — ۲</option>
+<option value="منیریه">منیریه — ۳</option>
+<option value="مهدیه">مهدیه — ۳ / ۷</option>
+<option value="مولوی">مولوی — ۷</option>
+<option value="میدان آزادی">میدان آزادی — ۴</option>
+<option value="میدان انقلاب اسلامی">میدان انقلاب اسلامی — ۴</option>
+<option value="میدان جهاد">میدان جهاد — ۳</option>
+<option value="میدان حر">میدان حر — ۲</option>
+<option value="میدان خراسان">میدان خراسان — ۶</option>
+<option value="میدان شهدا">میدان شهدا — ۶ / ۴</option>
+<option value="میدان صنعت">میدان صنعت — ۷</option>
+<option value="میدان قیام">میدان قیام — ۷</option>
+<option value="میدان محمدیه">میدان محمدیه — ۱ / ۷</option>
+<option value="میدان هروی">میدان هروی — ۳</option>
+<option value="میدان ولیعصر" selected>میدان ولیعصر — ۳ / ۶</option>
+<option value="میدان کتاب">میدان کتاب — ۷</option>
+<option value="میرداماد">میرداماد — ۱</option>
+<option value="میرزای شیرازی">میرزای شیرازی — ۳</option>
+<option value="نبرد">نبرد — ۴</option>
+<option value="نعمت‌آباد">نعمت‌آباد — ۳</option>
+<option value="نمایشگاه شهر آفتاب">نمایشگاه شهر آفتاب — انشعاب ۱ · پرند</option>
+<option value="نوبنیاد">نوبنیاد — ۳</option>
+<option value="نیروی هوایی">نیروی هوایی — ۴</option>
+<option value="هلال احمر">هلال احمر — ۷</option>
+<option value="وردآورد">وردآورد — ۵</option>
+<option value="ورزشگاه آزادی">ورزشگاه آزادی — ۵</option>
+<option value="پالایشگاه">پالایشگاه — ۱</option>
+<option value="پانزده خرداد">پانزده خرداد — ۱</option>
+<option value="پایانه جنوب">پایانه جنوب — ۱</option>
+<option value="پایانه ۱ و ۲ فرودگاه مهرآباد">پایانه ۱ و ۲ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پایانه ۴ و ۶ فرودگاه مهرآباد">پایانه ۴ و ۶ فرودگاه مهرآباد — انشعاب ۴ · مهرآباد</option>
+<option value="پیروزی">پیروزی — ۴</option>
+<option value="چهل‌تن دولاب">چهل‌تن دولاب — ۷</option>
+<option value="چیتگر">چیتگر — ۵</option>
+<option value="کارگر">کارگر — ۶</option>
+<option value="کرج">کرج — ۵</option>
+<option value="کمیل">کمیل — ۷</option>
+<option value="کهریزک">کهریزک — ۱</option>
+<option value="کیان‌شهر">کیان‌شهر — ۶</option>
+<option value="گرم‌دره">گرم‌دره — ۵</option>
+<option value="گلشهر">گلشهر — ۵ / انشعاب ۵ · هشتگرد</option>
+<option value="یادگار امام">یادگار امام — ۶</option>
+</select></div>
+        <div class="field"><label>از ساعت</label><input id="tableStart" class="input" type="time" value="08:00"></div>
+        <div class="field"><label>تا ساعت</label><input id="tableEnd" class="input" type="time" value="22:00"></div>
+        <div class="field"><label>روز</label><select id="tableDay" class="input"><option value="weekday">عادی</option><option value="thursday">پنجشنبه</option><option value="friday">تعطیل</option></select></div>
+        <div class="field"><label>معیار</label><select id="tableObjective" class="input"><option value="balanced">متعادل</option><option value="fastest">سریع‌ترین</option><option value="quietest">خلوت‌ترین</option><option value="reliable">مطمئن‌ترین</option></select></div>
+        <button type="button" id="buildTableBtn" class="primary wide" style="margin:0;width:auto;white-space:nowrap">ساخت جدول</button>
+      </div>
+      <div id="tableSummary" class="hint" style="margin-bottom:10px"></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>حرکت</th><th>رسیدن</th><th>مدت</th><th>مسیر پیشنهادی</th><th>خط‌ها</th><th>تعویض</th><th>شلوغی</th><th>پایداری</th></tr></thead>
+          <tbody id="scheduleBody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">هنوز جدولی ساخته نشده است.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="settings" class="section">
+    <div class="card settings">
+      <div class="section-title"><div><h2>تنظیمات شخصی مدل</h2><div class="hint">مقادیر در مرورگر ذخیره می‌شوند.</div></div><button type="button" id="resetSettings" class="secondary">بازنشانی</button></div>
+      <div class="setting-grid">
+        <div class="setting-box"><h4>هفت‌تیر</h4><div class="field"><label>زمان تعویض (دقیقه)</label><input class="input transfer-input" data-station="شهدای هفتم تیر" type="number" min="0" step="0.5" value="3"></div></div>
+        <div class="setting-box"><h4>شهید بهشتی</h4><div class="field"><label>زمان تعویض (دقیقه)</label><input class="input transfer-input" data-station="شهید بهشتی" type="number" min="0" step="0.5" value="3"></div></div>
+        <div class="setting-box"><h4>میدان محمدیه</h4><div class="field"><label>زمان تعویض (دقیقه)</label><input class="input transfer-input" data-station="میدان محمدیه" type="number" min="0" step="0.5" value="3"></div></div>
+        <div class="setting-box"><h4>مهدیه</h4><div class="field"><label>زمان تعویض (دقیقه)</label><input class="input transfer-input" data-station="مهدیه" type="number" min="0" step="0.5" value="3"></div></div>
+      </div>
+      <div class="setting-grid" style="margin-top:12px">
+        <div class="setting-box"><h4>زمان تعویض پیش‌فرض</h4><input id="defaultTransfer" class="input" type="number" min="0" step="0.5" value="3"></div>
+        <div class="setting-box"><h4>حداکثر تعداد تعویض</h4><input id="maxTransfers" class="input" type="number" min="0" max="5" step="1" value="4"></div>
+        <div class="setting-box"><h4>امتیاز صندلی شهرری</h4><input id="seatBonus" class="input" type="number" min="0" max="30" step="1" value="12"><div class="small" style="margin-top:6px">تجربه شخصی تو از قطارهای خلوت‌تر شهرری</div></div>
+        <div class="setting-box"><h4>حداکثر ردیف جدول</h4><input id="maxRows" class="input" type="number" min="10" max="200" step="10" value="100"></div>
+      </div>
+      <button type="button" id="saveSettings" class="primary" style="max-width:260px">ذخیره تنظیمات</button>
+      <div class="note">«شلوغی» داده زنده واگن نیست؛ یک شاخص تخمینی از ساعت پیک، سرفاصله، تقاضای نسبی خط و تجربه شخصی شماست.</div>
+    </div>
+  </section>
+<div class="note">زمان حرکت، زمان رسیدن و شلوغی در این فایل تخمینی‌اند و به اطلاعات زنده مترو متصل نیستند؛ برای مسیرهای فرودگاهی و حومه، برنامه روز سفر را بررسی کنید. <a style="color:inherit" href="https://www.saadatrent.com/mag/iran/tehran-metro-guide/" target="_blank" rel="noopener">مرجع فهرست خطوط و ایستگاه‌ها</a></div>
+<div id="appStatus" class="small" style="margin-top:14px;text-align:center;color:#8fd8c9">در حال راه‌اندازی موتور برنامه‌ریزی…</div>
+  <noscript><div class="note" style="margin-top:14px">برای استفاده از دکمه‌ها باید JavaScript مرورگر فعال باشد. اگر این فایل را داخل پیش‌نمایش ChatGPT باز کرده‌ای، آن را دانلود و مستقیماً با Chrome/Edge باز کن.</div></noscript>
+  <div class="footer">نسخه ۵ • وب آفلاین • دیتاست فعلی خطوط ۱ تا ۷ + انشعاب‌های پرند، مهرآباد و هشتگرد • مناسب برای تصمیم‌گیری روزمره، نه جایگزین اطلاعات زنده شرکت بهره‌برداری</div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+const LINE1=["تجریش","قیطریه","شهید صدر","قلهک","دکتر شریعتی","میرداماد","شهید حقانی","شهید همت","مصلی امام خمینی","شهید بهشتی","شهید مفتح","شهدای هفتم تیر","آیت‌الله طالقانی","دروازه دولت","سعدی","امام خمینی","پانزده خرداد","خیام","میدان محمدیه","شوش","پایانه جنوب","شهید بخارایی","علی‌آباد","جوانمرد قصاب","شهرری","پالایشگاه","شاهد - باقرشهر","حرم مطهر امام خمینی","کهریزک"];
+const LINE3=["قائم","شهید محلاتی","اقدسیه","نوبنیاد","حسین‌آباد","میدان هروی","شهید زین‌الدین","خواجه عبدالله انصاری","شهید صیاد شیرازی","شهید قدوسی","سهروردی","شهید بهشتی","میرزای شیرازی","میدان جهاد","میدان ولیعصر","تئاتر شهر","منیریه","مهدیه","راه‌آهن","جوادیه","زمزم","شهرک شریعتی","عبدل‌آباد","نعمت‌آباد","آزادگان"];
+const LINE6=["شهدای دولت‌آباد","کیان‌شهر","بعثت","شهید رضایی","میدان خراسان","امیرکبیر","میدان شهدا","امام حسین","سرباز وطن","بهار شیراز","شهدای هفتم تیر","مریم مقدس","میدان ولیعصر","بوستان لاله","کارگر","دانشگاه تربیت مدرس","شهرک آزمایش","مرزداران","یادگار امام","شهید اشرفی اصفهانی","شهید ستاری","شهر زیبا","شهران","شهدای کن","شهید آرمان علی‌وردی"];
+const LINE7=["میدان کتاب","شهید دادمان","میدان صنعت","برج میلاد تهران","بوستان گفتگو","دانشگاه تربیت مدرس","مدافعان سلامت","توحید","شهید نواب صفوی","رودکی","کمیل","بریانک","هلال احمر","مهدیه","میدان محمدیه","مولوی","میدان قیام","شهدای هفده شهریور","چهل‌تن دولاب","آهنگ","بسیج"];
+const LINE2=["فرهنگ‌سرا", "تهرانپارس", "شهید باقری", "دانشگاه علم و صنعت", "سرسبز", "جانبازان", "فدک", "سبلان", "شهید مدنی", "امام حسین", "دروازه شمیران", "بهارستان", "ملت", "امام خمینی", "حسن‌آباد", "دانشگاه امام علی", "میدان حر", "شهید نواب صفوی", "شادمان", "دانشگاه شریف", "طرشت", "تهران (صادقیه)"];
+const LINE4=["شهید کلاهدوز", "نیروی هوایی", "نبرد", "پیروزی", "ابن سینا", "میدان شهدا", "دروازه شمیران", "دروازه دولت", "فردوسی", "تئاتر شهر", "میدان انقلاب اسلامی", "توحید", "شادمان", "دکتر حبیب‌الله", "استاد معین", "میدان آزادی", "بیمه", "شهرک اکباتان", "ارم سبز", "علامه جعفری"];
+const LINE5=["تهران (صادقیه)", "ارم سبز", "ورزشگاه آزادی", "چیتگر", "ایران‌خودرو", "وردآورد", "گرم‌دره", "اتمسفر", "کرج", "محمدشهر", "گلشهر"];
+const LINE101=["شاهد - باقرشهر", "نمایشگاه شهر آفتاب", "فرودگاه امام خمینی", "شهر پرند"];
+const LINE104=["بیمه", "پایانه ۱ و ۲ فرودگاه مهرآباد", "پایانه ۴ و ۶ فرودگاه مهرآباد"];
+const LINE105=["گلشهر", "شهید فخری‌زاده", "شهید قاسم سلیمانی (هشتگرد)"];
+const LINES={1:LINE1,2:LINE2,3:LINE3,4:LINE4,5:LINE5,6:LINE6,7:LINE7,101:LINE101,104:LINE104,105:LINE105};
+const LINE_LABELS={"1": "۱", "3": "۳", "6": "۶", "7": "۷", "2": "۲", "4": "۴", "5": "۵", "101": "انشعاب ۱ · پرند", "104": "انشعاب ۴ · مهرآباد", "105": "انشعاب ۵ · هشتگرد"};
+const RUNTIME={1:75,2:48,3:61,4:45,5:57,6:62,7:49,101:60,104:8,105:40};
+const SEGMENTS={101:[8,27,25],104:[4,4],105:[20,20]};
+const DIR={2:["east","west"],4:["east","west"],5:["east","west"],101:["north","south"],104:["east","west"],105:["east","west"],1:["north","south"],3:["north","south"],6:["east","west"],7:["west","east"]};
+const LABEL_DIR={north:"شمال",south:"جنوب",east:"شرق",west:"غرب"};
+const SCHEDULE={
+ "1_north":{terminal:"کهریزک",days:{weekday:[["05:30","09:40",5],["09:40","14:10",6],["14:10","18:45",5],["18:45","19:33",6],["19:33","20:05",8],["20:05","20:55",10],["20:55","21:40",15],["21:40","22:00",20]],thursday:[["05:30","09:05",5],["09:05","18:05",6],["18:05","20:04",7],["20:04","20:55",10],["20:55","21:40",15],["21:40","22:00",20]],friday:[["06:00","06:30",10],["06:30","20:10",7],["20:10","20:30",10],["20:30","22:00",15]]}},
+ "1_south":{terminal:"تجریش",days:{weekday:[["05:30","06:10",20],["06:10","06:35",10],["06:35","10:10",5],["10:10","19:10",6],["19:10","21:10",7],["21:10","22:00",10]],thursday:[["05:30","06:10",20],["06:10","06:25",15],["06:25","06:35",10],["06:35","10:10",5],["10:10","19:10",6],["19:10","21:10",7],["21:10","22:00",10]],friday:[["06:00","06:40",20],["06:40","07:20",10],["07:20","21:00",7],["21:00","22:00",10]]}},
+ "3_south":{terminal:"قائم",days:{weekday:[["05:30","06:00",10],["06:00","06:16",8],["06:16","08:15",7],["08:15","09:30",5],["09:30","10:51",7],["10:51","14:47",8],["14:47","15:36",7],["15:36","19:58",6],["19:58","21:50",7],["21:50","22:00",10]],thursday:[["05:40","06:30",10],["06:30","20:00",9],["20:00","22:00",10]],friday:[["06:00","07:36",12],["07:36","08:36",10],["08:36","19:50",9],["19:50","21:30",10],["21:30","22:00",15]]}},
+ "3_north":{terminal:"آزادگان",days:{weekday:[["05:30","07:08",7],["07:08","08:18",5],["08:18","09:55",7],["09:55","14:19",8],["14:19","14:52",7],["14:52","19:30",6],["19:30","19:55",7],["19:55","21:15",8],["21:15","21:45",10],["21:45","22:00",15]],thursday:[["05:30","06:15",10],["06:15","20:30",9],["20:30","21:30",10],["21:30","22:00",15]],friday:[["06:00","06:30",15],["06:30","07:30",12],["07:30","19:40",9],["19:40","21:30",10],["21:30","22:00",15]]}},
+ "6_west":{terminal:"شهدای دولت‌آباد",days:{weekday:[["05:30","06:00",15],["06:00","06:32",11],["06:32","10:40",10],["10:40","14:58",11],["14:58","20:10",10],["20:10","21:40",15],["21:40","22:00",20]],thursday:[["05:30","06:00",15],["06:00","19:30",13],["19:30","20:12",14],["20:12","22:00",15]],friday:[["06:00","21:00",15],["21:00","22:00",20]]}},
+ "6_east":{terminal:"شهید آرمان علی‌وردی",days:{weekday:[["05:30","05:45",15],["05:45","09:33",10],["09:33","13:40",11],["13:40","19:55",10],["19:55","21:40",15],["21:40","22:00",20]],thursday:[["05:30","06:00",15],["06:00","17:55",13],["17:55","20:15",14],["20:15","22:00",15]],friday:[["06:00","06:20",20],["06:20","21:40",15],["21:40","22:00",20]]}},
+ "7_east":{terminal:"میدان کتاب",days:{weekday:[["05:30","06:00",15],["06:00","06:12",13],["06:12","09:53",10],["09:53","12:50",13],["12:50","20:16",10],["20:16","20:30",13],["20:30","22:00",15]],thursday:[["05:30","06:00",15],["06:00","06:12",14],["06:12","21:30",13],["21:30","22:00",20]],friday:[["06:07","22:07",15]]}},
+ "7_west":{terminal:"بسیج",days:{weekday:[["05:30","10:03",10],["10:03","14:39",12],["14:39","20:05",10],["20:05","21:30",15],["21:30","22:00",20]],thursday:[["05:30","06:00",15],["06:00","21:43",13],["21:43","22:00",17]],friday:[["06:07","22:07",15]]}}
+};
+// Additional service models are estimates, not a live timetable.
+for(const line of [2,4,5,101,104,105]){
+ for(let d=0;d<2;d++){
+  const terminal=LINES[line][d===0?LINES[line].length-1:0];
+  const h={2:6,4:6,5:15,101:120,104:15,105:90}[line];
+  let start='05:30',end='22:00',holiday='06:00';
+  if(line===101){start=d===0?'06:30':'05:30';end=d===0?'18:31':'17:31';holiday=start;}
+  if(line===104){start=d===0?'05:45':'05:37';end=d===0?'22:01':'21:53';holiday=d===0?'06:15':'06:07';}
+  if(line===105){start=d===0?'06:00':'05:20';end=d===0?'18:16':'17:31';holiday=d===0?'07:30':'06:50';}
+  SCHEDULE[`${line}_${DIR[line][d]}`]={terminal,days:{weekday:[[start,end,h]],thursday:[[start,end,h]],friday:[[holiday,end,line<100?h+5:h]]}};
+ }
+}
+const WEIGHTS={fastest:{time:.72,crowd:.08,wait:.10,risk:.06,transfers:.04},quietest:{time:.15,crowd:.62,wait:.08,risk:.08,transfers:.07},balanced:{time:.42,crowd:.28,wait:.12,risk:.12,transfers:.06},reliable:{time:.30,crowd:.12,wait:.10,risk:.40,transfers:.08}};
+const lineDemand={1:1,3:.452,6:.272,7:.205};
+const aliases={"شهر ری":"شهرری","ولیعصر":"میدان ولیعصر","میدان ولی عصر":"میدان ولیعصر","هفت تیر":"شهدای هفتم تیر","هفت‌تیر":"شهدای هفتم تیر","بهشتی":"شهید بهشتی","محمدیه":"میدان محمدیه"};
+let lastScheduleRows=[];
+function toMin(s){const [h,m]=s.split(':').map(Number);return h*60+m}function toHM(x){let n=Math.round(x);return String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function norm(s){return aliases[s]||s}function gen(blocks){const a=[];for(const [s,e,h] of blocks){for(let t=toMin(s);t<toMin(e);t+=h)a.push(t)}return [...new Set(a)].sort((a,b)=>a-b)}
+function travel(line,a,b){const st=LINES[line];const ia=st.indexOf(a),ib=st.indexOf(b);if(SEGMENTS[line])return SEGMENTS[line].slice(Math.min(ia,ib),Math.max(ia,ib)).reduce((x,y)=>x+y,0);return Math.abs(ia-ib)*(RUNTIME[line]/(st.length-1))}
+function direction(line,a,b){const st=LINES[line],ia=st.indexOf(a),ib=st.indexOf(b);return ib<ia?DIR[line][0]:DIR[line][1]}
+function common(a,b){const sb=new Set(LINES[b]);return LINES[a].filter(x=>sb.has(x))}function stationLines(s){return Object.keys(LINES).map(Number).filter(l=>LINES[l].includes(s))}
+const passCache=new Map();
+function passTimes(line,dir,station,day){const key=[line,dir,station,day].join("|");if(passCache.has(key))return passCache.get(key);const sc=SCHEDULE[`${line}_${dir}`];if(!sc)return[];
+ const ds=gen(sc.days[day]);const off=travel(line,sc.terminal,station);const result=ds.map(x=>x+off);passCache.set(key,result);return result}
+function nextPass(line,dir,station,ready,day){const a=passTimes(line,dir,station,day);return a.find(x=>x>=ready-1e-9)}
+function headwayAt(line,dir,t,day){if(line===7&&day==='weekday'&&((t>=360&&t<630)||(t>=960&&t<1200)))return 11;const sc=SCHEDULE[`${line}_${dir}`];if(!sc)return 12;for(const [a,b,h] of sc.days[day])if(t>=toMin(a)&&t<toMin(b))return h;return sc.days[day][sc.days[day].length-1][2]}
+function peakIntensity(t,day){if(day!=='weekday')return .3;if((t>=420&&t<480)||(t>=1020&&t<1080))return 1;if((t>=360&&t<630)||(t>=960&&t<1200))return .72;return .3}
+function settings(){const by={};document.querySelectorAll('.transfer-input').forEach(x=>by[x.dataset.station]=Number(x.value||0));return{by,defaultTransfer:Number(document.getElementById('defaultTransfer').value||3),maxTransfers:Number(document.getElementById('maxTransfers').value||0),seatBonus:Number(document.getElementById('seatBonus').value||0),maxRows:Number(document.getElementById('maxRows').value||100)}}
+function transferMin(st){const s=settings();return Number.isFinite(s.by[st])?s.by[st]:s.defaultTransfer}
+function crowd(line,dir,station,t,day){const h=headwayAt(line,dir,t,day),hp=Math.max(0,Math.min(1,(h-5)/15));let raw=100*(.38*(lineDemand[line]||.5)+.44*peakIntensity(t,day)+.18*hp);if(line===1&&station==='شهرری'&&dir==='north')raw-=settings().seatBonus;return Math.max(0,Math.min(100,raw))}
+const seqCache=new Map();
+function lineSeqs(os,ds,maxT){const key=[os.join(),ds.join(),maxT].join("|");if(seqCache.has(key))return seqCache.get(key);const g={};for(const l of Object.keys(LINES).map(Number))g[l]=[];for(const a of Object.keys(LINES).map(Number))for(const b of Object.keys(LINES).map(Number))if(a<b&&common(a,b).length){g[a].push(b);g[b].push(a)}const out=[];for(const start of os){const stack=[[start]];while(stack.length){const q=stack.pop(),last=q.at(-1);if(ds.includes(last)){out.push(q);continue}if(q.length-1>=maxT)continue;for(const n of g[last])if(!q.includes(n))stack.push([...q,n])}}seqCache.set(key,out);return out}
+function combos(seq){let opts=[[]];for(let i=0;i<seq.length-1;i++){const c=common(seq[i],seq[i+1]),n=[];for(const base of opts)for(const s of c)n.push([...base,s]);opts=n}return opts}
+function sensible(origin,dest,seq,tr){const pts=[origin,...tr,dest];if(new Set(tr).size!==tr.length)return false;for(let i=0;i<seq.length;i++){if(pts[i]===pts[i+1]||!LINES[seq[i]].includes(pts[i])||!LINES[seq[i]].includes(pts[i+1]))return false}return true}
+function simulate(origin,dest,ready,day,seq,tr){const pts=[origin,...tr,dest],rides=[],trs=[];let cur=ready;for(let i=0;i<seq.length;i++){const line=seq[i],a=pts[i],b=pts[i+1],dir=direction(line,a,b),board=nextPass(line,dir,a,cur,day);if(board==null)throw Error('no train');const alight=board+travel(line,a,b);rides.push({line,dir,a,b,board,alight,crowd:crowd(line,dir,a,board,day)});if(i<tr.length){const st=tr[i],walk=transferMin(st),rdy=alight+walk,nextLine=seq[i+1],nextDir=direction(nextLine,st,pts[i+2]),train=nextPass(nextLine,nextDir,st,rdy,day);if(train==null)throw Error('no connection');trs.push({station:st,arrival:alight,walk,ready:rdy,train,wait:Math.max(0,train-rdy)});cur=train}else cur=alight}
+ const arr=rides[rides.length-1].alight,inv=rides.reduce((s,r)=>s+r.alight-r.board,0),wait=trs.reduce((s,t)=>s+t.wait,0),walk=trs.reduce((s,t)=>s+t.walk,0),cr=rides.reduce((s,r)=>s+r.crowd*(r.alight-r.board),0)/Math.max(inv,.01);
+ const risks=trs.map((t,i)=>{const u=({1:1.5,3:1.5,6:2,7:2.5}[rides[i].line]||2.5),safe=1.5+u;if(t.wait>=safe)return 10;if(t.wait<=0)return 95;return 95-85*(t.wait/safe)}),risk=risks.length?risks.reduce((a,b)=>a+b,0)/risks.length:0;
+ return{routeId:`${seq.join('-')}|${tr.join('|')}`,origin,dest,seq,tr,rides,trs,firstTrain:rides[0].board,arrival:arr,total:arr-ready,inVehicle:inv,wait,walk,transfers:tr.length,crowd:cr,risk,reliability:risk<=25?'بالا':risk<=50?'متوسط رو به بالا':risk<=75?'متوسط':'حساس به تأخیر'}
+}
+function score(r,obj){const w=WEIGHTS[obj],tn=Math.min(r.total/90,1.5),cn=Math.min(r.crowd/100,1),wn=Math.min(r.wait/20,1.5),rn=Math.min(r.risk/100,1),tr=Math.min(r.transfers/3,1);return 100*(w.time*tn+w.crowd*cn+w.wait*wn+w.risk*rn+w.transfers*tr)}
+function planTrip(origin,dest,time,day,obj,maxT=settings().maxTransfers){origin=norm(origin);dest=norm(dest);if(origin===dest)throw Error('مبدأ و مقصد یکسان است؛ نیازی به سفر نیست.');const ready=toMin(time),os=stationLines(origin),ds=stationLines(dest);if(!os.length||!ds.length)throw Error('ایستگاه در دیتاست فعلی پشتیبانی نمی‌شود.');const routes=[];for(const seq of lineSeqs(os,ds,maxT))for(const tr of combos(seq)){if(!sensible(origin,dest,seq,tr))continue;try{const r=simulate(origin,dest,ready,day,seq,tr);r.score=score(r,obj);routes.push(r)}catch(e){}}
+ if(!routes.length)throw Error('در این ساعت مسیر قابل محاسبه‌ای پیدا نشد.');routes.sort((a,b)=>a.score-b.score||a.total-b.total||a.transfers-b.transfers);return{best:routes[0],alternatives:routes.slice(1,4),all:routes}}
+function lineChip(l){return `<span class="line-chip l${l}">${LINE_LABELS[l]}</span>`}function directionFlow(from,to,cls=''){return `<span class="direction-flow ${cls}" dir="rtl"><bdi>${from}</bdi><span aria-hidden="true">←</span><bdi>${to}</bdi></span>`}
+function routeText(r,markup=true){const parts=[r.origin];r.tr.forEach((s,i)=>{const from=LINE_LABELS[r.seq[i]],to=LINE_LABELS[r.seq[i+1]];parts.push(`${s} (${markup?directionFlow(from,to):'خط '+from+' به خط '+to})`)});parts.push(r.dest);return parts.join(' ← ')}
+function fmt(n){return Number(n).toFixed(1)}function relClass(r){return r.risk>70?'warn':'ok'}
+function renderPlan(p){const r=p.best;const steps=[];for(let i=0;i<r.rides.length;i++){const x=r.rides[i];steps.push(`<div class="step"><div class="dot">${LINE_LABELS[x.line]}</div><div><div class="step-title">${directionFlow(x.a+' '+lineChip(x.line),x.b)}</div><div class="step-sub">جهت ${LABEL_DIR[x.dir]} • شلوغی ${fmt(x.crowd)}/100</div></div><div class="time">${directionFlow(toHM(x.board),toHM(x.alight),'time-flow')}</div></div>`);if(i<r.trs.length){const t=r.trs[i];steps.push(`<div class="step"><div class="dot">⇄</div><div><div class="step-title">تعویض در ${t.station}</div><div class="step-sub">پیاده‌روی ${fmt(t.walk)} دقیقه • انتظار ${fmt(t.wait)} دقیقه</div></div><div class="time">${toHM(t.train)}</div></div>`)}}
+ const alts=p.alternatives.map((a,i)=>`<div class="alt"><div class="alt-top"><div class="alt-route">${i+1}. ${routeText(a)}</div><div class="time">${toHM(a.arrival)}</div></div><div class="alt-meta"><span class="badge">${fmt(a.total)} دقیقه</span><span class="badge">${a.transfers} تعویض</span><span class="badge">شلوغی ${fmt(a.crowd)}</span><span class="badge ${relClass(a)}">${a.reliability}</span><span class="route-lines">${[...new Set(a.seq)].map(lineChip).join('')}</span></div></div>`).join('');
+ document.getElementById('plannerResult').innerHTML=`<div class="section-title"><h2>پیشنهاد اصلی</h2><span class="badge ok">امتیاز ${fmt(r.score)}</span></div><div class="best"><div class="best-head"><div><div class="route-name">${routeText(r)}</div><div class="alt-meta"><span class="route-lines">${r.seq.map(lineChip).join('')}</span><span class="badge ${relClass(r)}">${r.reliability}</span></div></div><div class="time" style="font-size:20px">${toHM(r.arrival)}</div></div><div class="metrics"><div class="metric"><div class="v">${toHM(r.firstTrain)}</div><div class="k">اولین قطار</div></div><div class="metric"><div class="v">${fmt(r.total)}</div><div class="k">دقیقه تا مقصد</div></div><div class="metric"><div class="v">${fmt(r.wait)}</div><div class="k">انتظار تعویض</div></div><div class="metric"><div class="v">${fmt(r.crowd)}</div><div class="k">شلوغی / 100</div></div></div><div class="timeline">${steps.join('')}</div></div><div class="section-title"><h3>بهترین جایگزین‌ها</h3><span class="hint">رتبه‌بندی با همان معیار</span></div><div class="alt-list">${alts||'<div class="small">جایگزین دیگری پیدا نشد.</div>'}</div>`}
+function doPlan(){try{if(!validateStationField('origin')||!validateStationField('destination'))return;const p=planTrip(document.getElementById('origin').value,document.getElementById('destination').value,document.getElementById('readyTime').value,document.getElementById('dayType').value,document.getElementById('objective').value);renderPlan(p)}catch(e){document.getElementById('plannerResult').innerHTML=`<div class="empty"><div><div class="icon">⚠️</div><strong>${e.message}</strong></div></div>`}}
+function buildSchedule(){if(!validateStationField('tableOrigin')||!validateStationField('tableDestination'))return;const o=document.getElementById('tableOrigin').value,d=document.getElementById('tableDestination').value,day=document.getElementById('tableDay').value,obj=document.getElementById('tableObjective').value,start=toMin(document.getElementById('tableStart').value),end=toMin(document.getElementById('tableEnd').value),max=settings().maxRows;if(end<=start){toast('ساعت پایان باید بعد از ساعت شروع باشد.');return}if(end-start>900){toast('بازه خیلی طولانی است؛ حداکثر ۱۵ ساعت.');return}const rows=[],seen=new Set();for(let t=start;t<=end;t++){try{const p=planTrip(o,d,toHM(t),day,obj),r=p.best,k=`${Math.round(r.firstTrain)}|${r.routeId}`;if(!seen.has(k)&&r.firstTrain>=start-0.5&&r.firstTrain<=end+0.5){seen.add(k);rows.push(r);if(rows.length>=max)break}}catch(e){}}lastScheduleRows=rows;const body=document.getElementById('scheduleBody');if(!rows.length){body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">حرکتی پیدا نشد.</td></tr>';return}body.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td class="time">${toHM(r.firstTrain)}</td><td class="time">${toHM(r.arrival)}</td><td>${fmt(r.total)} دقیقه</td><td>${routeText(r)}</td><td><div class="route-lines">${r.seq.map(lineChip).join('')}</div></td><td>${r.transfers}</td><td>${fmt(r.crowd)}</td><td><span class="badge ${relClass(r)}">${r.reliability}</span></td></tr>`).join('');document.getElementById('tableSummary').textContent=`${rows.length} حرکت پیشنهادی از ${toHM(start)} تا ${toHM(end)} ساخته شد.`}
+function exportCSV(){if(!lastScheduleRows.length){toast('اول جدول را بساز.');return}const rows=[['حرکت','رسیدن','مدت دقیقه','مسیر','خط‌ها','تعویض','شلوغی','پایداری'],...lastScheduleRows.map(r=>[toHM(r.firstTrain),toHM(r.arrival),fmt(r.total),routeText(r,false),r.seq.map(l=>LINE_LABELS[l]).join(' - '),r.transfers,fmt(r.crowd),r.reliability])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='metro-plan.csv';a.click();URL.revokeObjectURL(a.href)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
+function saveSettings(){const s={defaultTransfer:document.getElementById('defaultTransfer').value,maxTransfers:document.getElementById('maxTransfers').value,seatBonus:document.getElementById('seatBonus').value,maxRows:document.getElementById('maxRows').value,transfers:{}};document.querySelectorAll('.transfer-input').forEach(x=>s.transfers[x.dataset.station]=x.value);localStorage.setItem('metroSettings',JSON.stringify(s));toast('تنظیمات ذخیره شد.')}
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem('metroSettings')||'null');if(!s)return;document.getElementById('defaultTransfer').value=s.defaultTransfer??3;document.getElementById('maxTransfers').value=s.maxTransfers??4;document.getElementById('seatBonus').value=s.seatBonus??12;document.getElementById('maxRows').value=s.maxRows??100;document.querySelectorAll('.transfer-input').forEach(x=>{if(s.transfers&&s.transfers[x.dataset.station]!=null)x.value=s.transfers[x.dataset.station]})}catch(e){}}
+function resetSettings(){localStorage.removeItem('metroSettings');document.getElementById('defaultTransfer').value=3;document.getElementById('maxTransfers').value=4;document.getElementById('seatBonus').value=12;document.getElementById('maxRows').value=100;document.querySelectorAll('.transfer-input').forEach(x=>x.value=3);toast('تنظیمات بازنشانی شد.')}
+function searchKey(s){return s.normalize('NFKC').replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[آأإ]/g,'ا').replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[\s\u200c\u200dـ()\-–]+/g,'').toLowerCase()}
+const searchAliases={'تهران (صادقیه)':'صادقیه','شهید قاسم سلیمانی (هشتگرد)':'مهستان هشتگرد','شهر پرند':'پرند','دانشگاه علم و صنعت':'علم و صنعت','دانشگاه شریف':'دانشگاه صنعتی شریف','شهدای هفتم تیر':'هفت تیر','شهید آرمان علی‌وردی':'کوهسار','پایانه ۱ و ۲ فرودگاه مهرآباد':'ترمینال 1 2 مهرآباد','پایانه ۴ و ۶ فرودگاه مهرآباد':'ترمینال 4 6 مهرآباد'};
+const pickers={};
+function fillStations(){
+ for(const id of ['origin','destination','tableOrigin','tableDestination']){
+  const select=document.getElementById(id),wrapper=document.createElement('div');wrapper.className='picker';select.before(wrapper);wrapper.append(select);select.hidden=true;
+  const input=document.createElement('input');input.className='input';input.id=id+'Search';input.placeholder='نام ایستگاه را جست‌وجو کن…';input.autocomplete='off';input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-expanded','false');input.setAttribute('aria-controls',id+'List');input.setAttribute('aria-label',select.getAttribute('aria-label'));input.value=select.value;
+  document.querySelector(`label[for="${id}"]`).htmlFor=input.id;
+  const clear=document.createElement('button');clear.type='button';clear.className='picker-clear';clear.textContent='×';clear.setAttribute('aria-label','پاک کردن جست‌وجو');
+  const menu=document.createElement('div');menu.id=id+'List';menu.className='picker-menu';menu.setAttribute('role','listbox');menu.hidden=true;wrapper.append(input,clear,menu);
+  const all=Array.from(select.options).map(o=>({name:o.value,detail:o.textContent.split(' — ')[1]}));let matches=[],active=-1;
+  function close(){menu.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant')}
+  function choose(name){select.value=name;input.value=name;input.removeAttribute('aria-invalid');close();select.dispatchEvent(new Event('change',{bubbles:true}))}
+  function highlight(){Array.from(menu.children).forEach((el,i)=>el.setAttribute('aria-selected',String(i===active)));if(active>=0){input.setAttribute('aria-activedescendant',id+'Option'+active);menu.children[active].scrollIntoView({block:'nearest'})}}
+  function show(query){const q=searchKey(query);matches=all.filter(o=>searchKey(o.name+' '+(searchAliases[o.name]||'')).includes(q));active=-1;menu.replaceChildren();
+   matches.forEach((o,i)=>{const row=document.createElement('div');row.className='picker-option';row.id=id+'Option'+i;row.setAttribute('role','option');row.setAttribute('aria-selected','false');const title=document.createElement('span');title.textContent=o.name;const detail=document.createElement('small');detail.textContent=o.detail;row.append(title,detail);row.addEventListener('mousedown',e=>e.preventDefault());row.addEventListener('click',()=>choose(o.name));menu.append(row)});
+   if(!matches.length){const empty=document.createElement('div');empty.className='picker-empty';empty.setAttribute('role','status');empty.textContent='ایستگاهی پیدا نشد؛ نام دیگری بنویس.';menu.append(empty)}menu.hidden=false;input.setAttribute('aria-expanded','true');input.removeAttribute('aria-activedescendant');
+  }
+  input.addEventListener('focus',()=>{input.select();show(select.value===input.value?'':input.value)});
+  input.addEventListener('click',()=>{if(menu.hidden)show('')});
+  input.addEventListener('input',()=>{select.value='';input.removeAttribute('aria-invalid');show(input.value)});
+  input.addEventListener('keydown',e=>{if(e.key==='Escape'){close();return}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(menu.hidden)show(input.value);if(matches.length){active=(active+(e.key==='ArrowDown'?1:-1)+matches.length)%matches.length;highlight()}}if(e.key==='Enter'&&!menu.hidden){e.preventDefault();if(matches.length)choose(matches[active<0?0:active].name)}});
+  wrapper.addEventListener('focusout',()=>setTimeout(()=>{if(!wrapper.contains(document.activeElement))close()},0));
+  document.addEventListener('pointerdown',e=>{if(!wrapper.contains(e.target))close()});
+  clear.addEventListener('click',()=>{select.value='';input.value='';input.focus();show('')});
+  pickers[id]={sync(){input.value=select.value;input.removeAttribute('aria-invalid');close()},validate(){const exact=all.find(o=>searchKey(o.name)===searchKey(input.value));if(exact){choose(exact.name);return true}input.setAttribute('aria-invalid','true');input.focus();return false}};
+ }
+}
+function validateStationField(id){
+  const el=document.getElementById(id);
+  if(pickers[id]&&!pickers[id].validate()){toast('یک ایستگاه از نتیجه‌های جست‌وجو انتخاب کن.');return false}
+  const value=norm(el.value);
+  if(!stationLines(value).length){
+    toast('لطفاً یک ایستگاه معتبر از فهرست انتخاب کن.');
+    return false;
+  }
+  return true;
+}
+window.addEventListener('error',function(ev){
+  const s=document.getElementById('appStatus');
+  if(s){s.textContent='خطای اجرای برنامه: '+(ev.message||'خطای ناشناخته');s.style.color='#ff9aa5';}
+});
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')}));
+document.getElementById('swapBtn').addEventListener('click',()=>{const a=document.getElementById('origin'),b=document.getElementById('destination'),v=a.value;a.value=b.value;b.value=v;pickers.origin.sync();pickers.destination.sync()});document.getElementById('planBtn').addEventListener('click',doPlan);document.getElementById('buildTableBtn').addEventListener('click',buildSchedule);document.getElementById('exportBtn').addEventListener('click',exportCSV);document.getElementById('saveSettings').addEventListener('click',saveSettings);document.getElementById('resetSettings').addEventListener('click',resetSettings);
+fillStations();
+loadSettings();
+document.getElementById('readyTime').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doPlan();}});
+['tableStart','tableEnd'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();buildSchedule();}})});
+const appStatus=document.getElementById('appStatus');if(appStatus){appStatus.textContent='✓ موتور برنامه‌ریزی آماده است — مبدأ و مقصد را از فهرست ایستگاه‌های موجود انتخاب کن.';}
+doPlan();
+</script>
+
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+  var status = document.getElementById('engineStatus');
+  if (status) status.textContent = '✓ رابط و فهرست ایستگاه‌ها آماده است';
+});
+</script>
+
+</body></html>
